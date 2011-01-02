@@ -98,7 +98,7 @@ class LogableBehavior extends ModelBehavior {
 		$this->settings[$Model->alias] = array_merge($this->defaults, $config);
 		$this->settings[$Model->alias]['ignore'][] = $Model->primaryKey;
 
-		$this->Log =& ClassRegistry::init('Log.Log');
+		$this->Log =& ClassRegistry::init('Log');
 		if ($this->settings[$Model->alias]['userModel'] != $Model->alias) {
 			$this->UserModel =& ClassRegistry::init($this->settings[$Model->alias]['userModel']);
 		} else {
