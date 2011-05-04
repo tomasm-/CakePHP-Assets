@@ -71,7 +71,7 @@ class LogableBehavior extends ModelBehavior {
 		'enabled' => true,
 		'userModel' => 'User',
 		'userKey' => 'user_id',
-		'change' => 'list',
+		'changed' => 'list',
 		'description_ids' => true,
 		'skip' => array(),
 		'ignore' => array(),
@@ -231,9 +231,9 @@ class LogableBehavior extends ModelBehavior {
 			$result[$key]['Log']['id'] = $one['id'];
 			$result[$key]['Log']['event'] = $username;
 			// have all the detail models and change as list :
-			if (isset($one[$this->settings[$Model->alias]['classField']]) && isset($one['action']) && isset($one['change']) && isset($one[$this->settings[$Model->alias]['foreignKey']])) {
+			if (isset($one[$this->settings[$Model->alias]['classField']]) && isset($one['action']) && isset($one['changed']) && isset($one[$this->settings[$Model->alias]['foreignKey']])) {
 				if ($one['action'] == 'edit') {
-					$result[$key]['Log']['event'] .= ' edited '.$one['change'].' of '.strtolower($one[$this->settings[$Model->alias]['classField']]).'(id '.$one[$this->settings[$Model->alias]['foreignKey']].')';
+					$result[$key]['Log']['event'] .= ' edited '.$one['changed'].' of '.strtolower($one[$this->settings[$Model->alias]['classField']]).'(id '.$one[$this->settings[$Model->alias]['foreignKey']].')';
 					// ' at '.$one['created'];
 				} elseif ($one['action'] == 'add') {
 					$result[$key]['Log']['event'] .= ' added a '.strtolower($one[$this->settings[$Model->alias]['classField']]).'(id '.$one[$this->settings[$Model->alias]['foreignKey']].')';
@@ -353,7 +353,7 @@ class LogableBehavior extends ModelBehavior {
 	}
 
 	function beforeSave(&$Model) {
-		if (isset($this->Log->_schema['change']) && $Model->id) {
+		if (isset($this->Log->_schema['changed']) && $Model->id) {
 			$this->old = $Model->find('first', array('conditions' => array(
 				$Model->alias .'.'. $Model->primaryKey => $Model->id),
 				'recursive'=>-1
@@ -409,8 +409,8 @@ class LogableBehavior extends ModelBehavior {
 			}
 		}
 
-		if (isset($this->Log->_schema['change'])) {
-			$logData['Log']['change'] = '';
+		if (isset($this->Log->_schema['changed'])) {
+			$logData['Log']['changed'] = '';
 			$db_fields = array_keys($Model->_schema);
 			$changed_fields = array();
 			foreach ($Model->data[$Model->alias] as $key => $value) {
@@ -423,9 +423,9 @@ class LogableBehavior extends ModelBehavior {
 				if ($key != 'modified'
 				&& !in_array($key, $this->settings[$Model->alias]['ignore'])
 				&& $value != $old && in_array($key,$db_fields)) {
-					if ($this->settings[$Model->alias]['change'] == 'full') {
+					if ($this->settings[$Model->alias]['changed'] == 'full') {
 						$changed_fields[] = $key . ' ('.$old.') => ('.$value.')';
-					} else if ($this->settings[$Model->alias]['change'] == 'serialize') {
+					} else if ($this->settings[$Model->alias]['changed'] == 'serialize') {
 						$changed_fields[$key] =  array('old'=>$old, 'value'=>$value);
 					} else {
 						$changed_fields[] = $key;
@@ -436,10 +436,10 @@ class LogableBehavior extends ModelBehavior {
 			if ($changes == 0) {
 				return true;
 			}
-			if ($this->settings[$Model->alias]['change'] == 'serialize') {
-				$logData['Log']['change'] = serialize($changed_fields);
+			if ($this->settings[$Model->alias]['changed'] == 'serialize') {
+				$logData['Log']['changed'] = serialize($changed_fields);
 			} else {
-				$logData['Log']['change'] = implode(', ', $changed_fields);
+				$logData['Log']['changed'] = implode(', ', $changed_fields);
 			}
 			$logData['Log']['changes'] = $changes;
 		}
